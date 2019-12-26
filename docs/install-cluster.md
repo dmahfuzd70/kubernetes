@@ -128,6 +128,12 @@ mkdir /home/venkatn/.kube
 cp /etc/kubernetes/admin.conf /home/venkatn/.kube/config
 chown -R venkatn:venkatn /home/venkatn/.kube
 ```
+
+##### Deploy Flannel Network
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+
 ##### Deploy Calico network
 This has to be done as the user in the above step (in my case it is __venkatn__)
 ```
