@@ -21,16 +21,46 @@ cat >>/etc/hosts<<EOF
 EOF
 ```
 ##### Install, enable and start docker service
-Use the Docker repository to install docker.
-> If you use docker from CentOS OS repository, the docker version might be old to work with Kubernetes v1.13.0 and above
-```
-yum install -y -q yum-utils device-mapper-persistent-data lvm2 > /dev/null 2>&1
-yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo > /dev/null 2>&1
-yum install -y -q docker-ce >/dev/null 2>&1
 
-systemctl enable docker
-systemctl start docker
-```
+
+# Install Docker CE
+## Set up the repository
+### Install required packages.
+yum install yum-utils device-mapper-persistent-data lvm2
+
+### Add Docker repository.
+yum-config-manager --add-repo \
+  https://download.docker.com/linux/centos/docker-ce.repo
+
+## Install Docker CE.
+yum update && yum install \
+  containerd.io-1.2.10 \
+  docker-ce-19.03.4 \
+  docker-ce-cli-19.03.4
+
+## Create /etc/docker directory.
+mkdir /etc/docker
+
+# Setup daemon.
+cat > /etc/docker/daemon.json <<EOF
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2",
+  "storage-opts": [
+    "overlay2.override_kernel_check=true"
+  ]
+}
+EOF
+
+mkdir -p /etc/systemd/system/docker.service.d
+
+systemctl daemon-reload
+systemctl restart docker
+
 ##### Disable SELinux
 ```
 setenforce 0
